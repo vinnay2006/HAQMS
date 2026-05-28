@@ -1,26 +1,35 @@
-# HAQMS Backend - Node + Express + Prisma API Server
+## 🔧 Bug Fixes & Improvements
 
-This is the Express API server and database layer for the Hospital Appointment & Queue Management System.
+This is a forked version of HAQMS with the following fixes applied:
 
-## 🚀 Running the API
-The backend server runs on port `5000` by default.
+### 🔴 Security Fixes
+- Fixed SQL Injection vulnerability in doctors search route
+- Removed plain text password logging from auth routes
+- Excluded password hash from registration API response
+- Restored broken admin role check in authorization middleware
+- Fixed JWT expiration being ignored (ignoreExpiration: true removed)
+- Reduced JWT token lifetime from 365 days to 8 hours
+- Removed hardcoded JWT secret fallback
+- Restricted CORS to frontend origin only
 
-### Setup Database Environment
-1. Ensure a local PostgreSQL instance is running or launch the pre-packaged docker container.
-2. Build migrations and run the mock seed:
-```bash
-npm run db:setup
-```
+### 🟠 Performance Fixes
+- Fixed N+1 query problem in appointments route
+- Replaced in-memory pagination with database-level pagination
+- Replaced sequential DB calls with parallel Promise.all in doctor stats
+- Replaced loop queries in reports with grouped aggregation
 
-### Start Development Server
-```bash
-npm run dev
-```
+### 🟡 Concurrency Fixes
+- Removed artificial sleep delay in queue check-in
+- Fixed race condition in queue token generation using Prisma transaction
+- Improved duplicate appointment booking check to hour-level slots
 
-## 🔍 Candidate Scope
-Analyze, profile, secure, and refactor files inside `src/` and `prisma/`:
-- **SQL Injection**: Resolve raw interpolation queries in `src/routes/doctors.js`.
-- **N+1 Database Queries**: Optimize appointments aggregation inside `src/routes/appointments.js`.
-- **Concurrency Race Conditions**: Secure `src/routes/queue.js` token increments.
-- **Weak Authorization**: Patch route security in `src/routes/patients.js`.
-- **Schema Optimization**: Introduce proper constraints and indexes in `prisma/schema.prisma`.
+## 🚀 Live Demo
+- **Frontend:** https://haqms-kappa.vercel.app
+- **Backend:**https://haqms-production-4150.up.railway.app
+
+## 🔑 Demo Credentials
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@haqms.com | password123 |
+| Receptionist | reception1@haqms.com | password123 |
+| Doctor | doctor1@haqms.com | password123 |
