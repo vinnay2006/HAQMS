@@ -62,19 +62,25 @@ router.post('/', authenticate, async (req, res) => {
     // It only checks if the exact millisecond matches. If the candidate books for "2026-05-25 10:00:00"
     // and another for "2026-05-25 10:00:01", they are treated as unique!
     // Junior dev logic: "Same time bookings will be blocked."
-    const existingBooking = await prisma.appointment.findFirst({
-      where: {
-        doctorId,
-        appointmentDate: appDate,
-        status: { not: 'CANCELLED' },
-      },
-    });
+   // REPLACE the duplicate check block with this
+const slotStart = new Date(appDate);
+slotStart.setMinutes(0, 0, 0);
+const slotEnd = new Date(slotStart);
+slotEnd.setHours(slotEnd.getHours() + 1);
 
-    if (existingBooking) {
-      return res.status(400).json({
-        error: 'Double booking blocked. Doctor already has an appointment at this exact millisecond.',
-      });
-    }
+const existingBooking = await prisma.appointment.findFirst({
+  where: {
+    doctorId,
+    appointmentDate: { gte: slotStart, lt: slotEnd },
+    status: { not: 'CANCELLED' },
+  },
+});
+
+if (existingBooking) {
+  return res.status(400).json({
+    error: 'Doctor already has an appointment in this time slot.',
+  });
+}
 
     const appointment = await prisma.appointment.create({
       data: {
